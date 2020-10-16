@@ -53,7 +53,7 @@ const remote_or_cache = (remote_url, local_file, description, runner) => {
 
         // Remove comments
         tests = tests.filter(test => typeof test !== 'string');
-
+        // eslint-disable-next-line no-console
         console.log(`Including ${tests.length} ${description}`);
 
         QUnit.test(description, assertInner => {
@@ -68,11 +68,13 @@ const remote_or_cache = (remote_url, local_file, description, runner) => {
 
     fs.stat(local_file, err => {
       if (err) {
+        // eslint-disable-next-line no-console
         console.log(`Downloading ${description} from JsonLogic.com`);
         download(remote_url, local_file, () => {
           parse_and_iterate();
         });
       } else {
+        // eslint-disable-next-line no-console
         console.log(`Using cached ${description}`);
         parse_and_iterate();
       }
@@ -134,14 +136,18 @@ QUnit.test('Bad operator', assert => {
 
 QUnit.test('logging', assert => {
   let last_console;
-  // eslint-disable-next-line func-names
-  console.log = function(logged) {
-    last_console = logged;
+  const originalConsole = console;
+  // eslint-disable-next-line no-global-assign
+  console = {
+    log: logged => {
+      last_console = logged;
+    },
   };
-  assert.equal(jsonLogic.apply({ log: [1] }), 1);
-  assert.equal(last_console, 1);
 
-  delete console.log;
+  assert.equal(jsonLogic.apply({ log: 'apple' }), 'apple');
+  assert.equal(last_console, 'apple');
+  // eslint-disable-next-line no-global-assign
+  console = originalConsole;
 });
 
 QUnit.test('edge cases', assert => {
